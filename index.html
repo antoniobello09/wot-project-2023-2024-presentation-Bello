@@ -1,3 +1,820 @@
-<html>
-  
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IoT Logistics Platform</title>
+  <link rel="icon" type="image/svg+xml" href="truck_logo.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-primary: #0a0e17;
+      --bg-secondary: #0f1420;
+      --bg-card: #131825;
+      --bg-card-hover: #181e2e;
+      --cyan: #00e5ff;
+      --cyan-dim: #00a5b8;
+      --cyan-glow: rgba(0, 229, 255, 0.15);
+      --cyan-glow-strong: rgba(0, 229, 255, 0.35);
+      --magenta: #e040fb;
+      --text-primary: #e8eaf6;
+      --text-secondary: #8892a8;
+      --text-dim: #4a5568;
+      --border: rgba(255, 255, 255, 0.06);
+      --grid-line: rgba(0, 229, 255, 0.04);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.7;
+      overflow-x: hidden;
+    }
+
+    /* ── GRID BACKGROUND ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(var(--grid-line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── GLOW ORB ── */
+    .glow-orb {
+      position: fixed;
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, var(--cyan-glow) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+      filter: blur(80px);
+      top: -200px;
+      right: -100px;
+      animation: orbFloat 12s ease-in-out infinite alternate;
+    }
+
+    .glow-orb.secondary {
+      background: radial-gradient(circle, rgba(224, 64, 251, 0.08) 0%, transparent 70%);
+      top: auto;
+      bottom: -200px;
+      right: auto;
+      left: -150px;
+      animation-delay: -6s;
+    }
+
+    @keyframes orbFloat {
+      0% { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(40px, 60px) scale(1.15); }
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(10, 14, 23, 0.8);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-logo {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      font-size: 1.15rem;
+      color: var(--cyan);
+      letter-spacing: -0.02em;
+      text-decoration: none;
+    }
+
+    .nav-logo span {
+      color: var(--text-dim);
+      font-weight: 400;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 400;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      transition: color 0.3s;
+    }
+
+    .nav-links a:hover { color: var(--cyan); }
+
+    /* ── SECTIONS ── */
+    section {
+      position: relative;
+      z-index: 1;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 6rem 2rem;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 3rem;
+      padding-top: 8rem;
+    }
+
+    .hero-text {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .hero-image {
+      flex: 0 0 auto;
+      max-width: 480px;
+      width: 45%;
+    }
+
+    .hero-image img {
+      width: 100%;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    }
+
+    .hero-title-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .hero-title-row img {
+      width: 64px;
+      height: 64px;
+    }
+
+    /* ── CAROUSEL ── */
+    .carousel {
+      position: relative;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    .carousel-track {
+      display: flex;
+      transition: transform 0.5s ease;
+    }
+
+    .carousel-slide {
+      min-width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 2.5rem;
+      padding: 2.5rem;
+    }
+
+    .carousel-slide img {
+      width: 55%;
+      max-width: 500px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      flex-shrink: 0;
+    }
+
+    .carousel-caption {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .carousel-caption h3 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .carousel-caption p {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      font-weight: 300;
+      line-height: 1.6;
+    }
+
+    .carousel-controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      padding: 1.25rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .carousel-btn {
+      background: var(--bg-card-hover);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1.1rem;
+      transition: all 0.3s;
+    }
+
+    .carousel-btn:hover {
+      border-color: var(--cyan-dim);
+      color: var(--cyan);
+      box-shadow: 0 0 12px var(--cyan-glow);
+    }
+
+    .carousel-dots {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .carousel-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--text-dim);
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      transition: all 0.3s;
+    }
+
+    .carousel-dot.active {
+      background: var(--cyan);
+      box-shadow: 0 0 8px var(--cyan-glow-strong);
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--cyan);
+      background: var(--cyan-glow);
+      border: 1px solid rgba(0, 229, 255, 0.2);
+      padding: 0.35rem 1rem;
+      border-radius: 100px;
+      width: fit-content;
+      margin-bottom: 2rem;
+    }
+
+    .hero-badge::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      background: var(--cyan);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--cyan);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .hero h1 {
+      font-size: clamp(2.8rem, 6vw, 5rem);
+      font-weight: 800;
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero h1 .accent {
+      background: linear-gradient(135deg, var(--cyan) 0%, var(--magenta) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-sub {
+      font-size: 1.15rem;
+      color: var(--text-secondary);
+      max-width: 600px;
+      font-weight: 300;
+      margin-bottom: 2.5rem;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.8rem 1.8rem;
+      border-radius: 8px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn-primary {
+      background: var(--cyan);
+      color: var(--bg-primary);
+      box-shadow: 0 0 20px var(--cyan-glow-strong), 0 4px 15px rgba(0,0,0,0.3);
+    }
+
+    .btn-primary:hover {
+      box-shadow: 0 0 35px var(--cyan-glow-strong), 0 4px 20px rgba(0,0,0,0.4);
+      transform: translateY(-2px);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text-secondary);
+      border: 1px solid var(--border);
+    }
+
+    .btn-ghost:hover {
+      border-color: var(--cyan-dim);
+      color: var(--text-primary);
+    }
+
+    /* ── SECTION TITLES ── */
+    .section-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--cyan);
+      margin-bottom: 0.75rem;
+    }
+
+    .section-title {
+      font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 1rem;
+    }
+
+    .section-desc {
+      color: var(--text-secondary);
+      font-weight: 300;
+      max-width: 600px;
+      margin-bottom: 2rem;
+    }
+
+    /* ── DIVIDER ── */
+    .divider {
+      border: none;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--cyan-dim), transparent);
+      opacity: 0.2;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    /* ── CARD GRID ── */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2rem;
+      transition: all 0.35s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--cyan), var(--magenta));
+      opacity: 0;
+      transition: opacity 0.35s ease;
+    }
+
+    .card:hover {
+      background: var(--bg-card-hover);
+      border-color: rgba(0, 229, 255, 0.15);
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .card:hover::before { opacity: 1; }
+
+    .card-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      background: var(--cyan-glow);
+      border: 1px solid rgba(0, 229, 255, 0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .card h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .card p {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      font-weight: 300;
+    }
+
+    /* ── ARCH DIAGRAM ── */
+    .arch-container {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 3rem 2rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .arch-container::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at center, var(--cyan-glow) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .arch-placeholder {
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--text-dim);
+      font-size: 0.85rem;
+      padding: 4rem 0;
+    }
+
+    .arch-placeholder span {
+      color: var(--cyan-dim);
+    }
+
+    /* ── PILLS ── */
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.45rem 1rem;
+      border-radius: 100px;
+      font-size: 0.82rem;
+      font-weight: 500;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      color: var(--text-primary);
+      transition: all 0.3s;
+    }
+
+    .pill:hover {
+      border-color: var(--cyan-dim);
+      box-shadow: 0 0 12px var(--cyan-glow);
+    }
+
+    .pill .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+    }
+
+    /* ── AUTHOR ── */
+    .author-links {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 3rem 2rem;
+      color: var(--text-dim);
+      font-size: 0.8rem;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    footer a {
+      color: var(--cyan-dim);
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      color: var(--cyan);
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      nav { padding: 0.75rem 1.25rem; }
+      .nav-links { display: none; }
+      section { padding: 4rem 1.25rem; }
+      .card-grid { grid-template-columns: 1fr; }
+      .hero { padding-top: 6rem; flex-direction: column; }
+      .hero-image { width: 100%; max-width: 100%; }
+      .carousel-slide { flex-direction: column; padding: 1.5rem; gap: 1.5rem; }
+      .carousel-slide img { width: 100%; max-width: 100%; }
+      .hero-title-row img { width: 48px; height: 48px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="glow-orb"></div>
+  <div class="glow-orb secondary"></div>
+
+  <!-- ── NAV ── -->
+  <nav>
+    <ul class="nav-links">
+      <li><a href="#intro">Introduzione</a></li>
+      <li><a href="#features">Funzionalità</a></li>
+      <li><a href="#architecture">Architettura</a></li>
+      <li><a href="#autoencoder">Autoencoder</a></li>
+      <li><a href="#links">GitHub ↗</a></li>
+    </ul>
+  </nav>
+
+  <!-- ── HERO ── -->
+  <section class="hero" id="hero">
+    <div class="hero-text">
+      <div class="hero-title-row">
+        <img src="truck_logo.svg" alt="Logo" />
+        <h1>
+          Carrier<br /><span class="accent">Platform</span>
+        </h1>
+      </div>
+      <p class="hero-sub">
+        Piattaforma IoT per la prenotazione di spedizioni e il monitoraggio in tempo reale dei viaggi di spedizione.
+      </p>
+    </div>
+    <div class="hero-image">
+      <img src="dashboard.png" alt="Dashboard preview" />
+    </div>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- ── 01 INTRODUZIONE ── -->
+  <section id="intro">
+    <p class="section-label">// 01 — Introduzione</p>
+    <h2 class="section-title">Il progetto</h2>
+    <p class="section-desc">
+      Il progetto prevede una piattaforma Iot per un'azienda logistica. Permette ai suoi clienti di spedire i propri pacchi. 
+      Scegliendo di spedire il proprio pacco lungo rotte già programmate è possibile far risparmiare denaro al cliente e allo stesso tempo ridurre l'impatto ambientale.
+    </p>
+    <p class="section-desc">
+      Inoltre, è presente un sistema di monitoraggio in tempo reale con anomaly detection delle condizioni delle celle frigorifere dei veicoli in cammino.
+    </p>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- ── 02 FUNZIONALITÀ ── -->
+  <section id="features">
+    <p class="section-label">// 02 — Funzionalità</p>
+    <h2 class="section-title">Cosa può fare</h2>
+    <p class="section-desc">
+      Il sistema offre una serie di funzionalità chiave, tra cui:
+    </p>
+
+    <div class="carousel">
+      <div class="carousel-track" id="carouselTrack">
+        <div class="carousel-slide">
+          <img src="send_parcel.png" alt="Form per l'invio di un pacco" />
+          <div class="carousel-caption">
+            <h3>Invio di un pacco</h3>
+            <p>Inserendo i dati richiesti, il sistema è capace di cercare i veicoli liberi con i quali inizializzare un nuovo viaggio. 
+              &Egrave; in grado anche di proporre veicoli a cui è già stato assegnato un viaggio con ancora spazio disponibile. 
+              Ciò permette l'aggregazione dei pacchi in una singola spedizione permettendo un risparmio al cliente e riducendo l'impatto ambientale.</p>
+          </div>
+        </div>
+        <div class="carousel-slide">
+          <img src="login.png" alt="Form di login" />
+          <div class="carousel-caption">
+            <h3>Login</h3>
+            <p>Il manager della piattaforma può accedere al sistema effettuando il login con le sue credenziali.</p>
+          </div>
+        </div>
+        <div class="carousel-slide">
+          <img src="add_vehicle.png" alt="Form per l'aggiunta di un veicolo" />
+          <div class="carousel-caption">
+            <h3>Aggiunta veicolo</h3>
+            <p>Il manager può aggiungere nuovi veicoli al sistema, specificando i parametri richiesti.</p>
+          </div>
+        </div>
+        <div class="carousel-slide">
+          <img src="vehicles_list.png" alt="Lista dei veicoli registrati" />
+          <div class="carousel-caption">
+            <h3>Lista veicoli</h3>
+            <p>Il manager può visualizzare la lista di tutti i veicoli registrati nel sistema.</p>
+          </div>
+        </div>
+        <div class="carousel-slide">
+          <img src="trip_list.png" alt="Lista dei viaggi programmati" />
+          <div class="carousel-caption">
+            <h3>Lista viaggi</h3>
+            <p>Il manager può visualizzare la lista di tutti i viaggi programmati</p>
+          </div>
+        </div>
+        <div class="carousel-slide">
+          <img src="normal_dashboard.png" alt="Dashboard per il monitoraggio" />
+          <div class="carousel-caption">
+            <h3>Dashboard</h3>
+            <p>Il manager può visualizzare una dashboard con informazioni riguardo le condizioni delle celle frigorifere dei veicoli in cammino.</p>
+          </div>
+        </div>
+        <div class="carousel-slide">
+          <img src="anomaly_dashboard.png" alt="Segnalazione di anomalie" />
+          <div class="carousel-caption">
+            <h3>Anomalie</h3>
+            <p>Il manager può ricevere notifiche in tempo reale riguardo l'eventuale presenza di anomalie nei veicoli in viaggio.</p>
+          </div>
+        </div>
+      </div>
+      <div class="carousel-controls">
+        <button class="carousel-btn" onclick="moveCarousel(-1)">‹</button>
+        <div class="carousel-dots" id="carouselDots"></div>
+        <button class="carousel-btn" onclick="moveCarousel(1)">›</button>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- ── 03 ARCHITETTURA ── -->
+  <section id="architecture">
+    <p class="section-label">// 03 — Architettura</p>
+    <h2 class="section-title">Come funziona</h2>
+    <p class="section-desc">
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec vel sapien augue. Integer a dui ut tortor elementum sollicitudin vel ac ante.
+    </p>
+
+    <div class="arch-container">
+      <!-- Sostituisci con <img src="arch.png" style="max-width:100%; position:relative; z-index:1;"> -->
+      <p class="arch-placeholder">[ <span>Inserisci qui il diagramma dell'architettura</span> ]</p>
+    </div>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- ── 04 AUTOENCODER ── -->
+  <section id="autoencoder">
+    <p class="section-label">// 04 — Autoencoder</p>
+    <h2 class="section-title">Anomaly Detection</h2>
+    <p class="section-desc">
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce tincidunt tortor at nibh finibus, non posuere sapien efficitur. Praesent euismod diam vel sem faucibus.
+    </p>
+
+    <div class="arch-container">
+      <!-- Sostituisci con <img src="autoencoder.png" style="max-width:100%; position:relative; z-index:1;"> -->
+      <p class="arch-placeholder">[ <span>Schema / grafico autoencoder</span> ]</p>
+    </div>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- ── 05 LINK GITHUB ── -->
+  <section id="links">
+    <p class="section-label">// 05 — Repository</p>
+    <h2 class="section-title">Codice sorgente</h2>
+
+    <div class="card-grid">
+      <a href="https://github.com/antoniobello09/wot-project-2023-2024-carrier-management-service-Bello" target="_blank" class="card" style="text-decoration:none; color:inherit;">
+        <div class="card-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" style="color: var(--cyan);">
+            <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+          </svg>
+        </div>
+        <h3>wot-project-2023-2024-carrier-management-service-Bello</h3>
+        <p>Servizio per la gestione dei viaggi e dei veicoli scritto con Spring Boot</p>
+      </a>
+    </div>
+    <div class="card-grid">
+      <a href="https://github.com/antoniobello09/wot-project-2023-2024-frontend-Bello" target="_blank" class="card" style="text-decoration:none; color:inherit;">
+        <div class="card-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" style="color: var(--cyan);">
+            <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+          </svg>
+        </div>
+        <h3>wot-project-2023-2024-frontend-Bello</h3>
+        <p>Servizio Frontend della piattaforma scritto con React</p>
+      </a>
+    </div>
+    <div class="card-grid">
+      <a href="https://github.com/antoniobello09/wot-project-2023-2024-simulator-autoencoder-Bello" target="_blank" class="card" style="text-decoration:none; color:inherit;">
+        <div class="card-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" style="color: var(--cyan);">
+            <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+          </svg>
+        </div>
+        <h3>wot-project-2023-2024-simulator-autoencoder-Bello</h3>
+        <p>Servizio di simulazione dati e servizio di rilevamento anomalia. Sono scritti in Python con FastAPI</p>
+      </a>
+    </div>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- ── 06 AUTORE ── -->
+  <section id="author">
+    <p class="section-label">// 06 — Autore</p>
+    <h2 class="section-title">Antonio Bello</h2>
+
+    <div class="author-links">
+      <a href="mailto:tuaemail@example.com" class="pill" style="text-decoration:none; cursor:pointer;">
+        <span class="dot" style="background:var(--cyan);"></span> antonio.bello@studenti.unisalento.it
+      </a>
+      <a href="https://github.com/antoniobello09" target="_blank" class="pill" style="text-decoration:none; cursor:pointer;">
+        <span class="dot" style="background:#e8eaf6;"></span> github.com/antoniobello09
+      </a>
+    </div>
+  </section>
+
+
+  <hr class="divider" />
+
+  <!-- ── FOOTER ── -->
+  <footer>
+    <p>Progetto per l'esame di Internet of Things  &mdash; Bello Antonio &mdash; 2026</p>
+  </footer>
+
+  <!-- ── CAROUSEL SCRIPT ── -->
+  <script>
+    let currentSlide = 0;
+    const track = document.getElementById('carouselTrack');
+    const slides = track.querySelectorAll('.carousel-slide');
+    const dotsContainer = document.getElementById('carouselDots');
+
+    slides.forEach((_, i) => {
+      const dot = document.createElement('button');
+      dot.className = 'carousel-dot' + (i === 0 ? ' active' : '');
+      dot.onclick = () => goToSlide(i);
+      dotsContainer.appendChild(dot);
+    });
+
+    function goToSlide(index) {
+      currentSlide = index;
+      track.style.transform = `translateX(-${currentSlide * 100}%)`;
+      document.querySelectorAll('.carousel-dot').forEach((d, i) => {
+        d.classList.toggle('active', i === currentSlide);
+      });
+    }
+
+    function moveCarousel(direction) {
+      let next = currentSlide + direction;
+      if (next < 0) next = slides.length - 1;
+      if (next >= slides.length) next = 0;
+      goToSlide(next);
+    }
+  </script>
+
+</body>
 </html>
